@@ -7,21 +7,18 @@
 #define MAX_SONGS 1000
 #define MAX_LINE 256
 
-// Struct lưu thông tin bài hát
-// Updated Struct to match Kaggle Dataset
+// Updated Struct: Perfectly aligned with the Valence-Arousal theory
 typedef struct
 {
-    char title[150];    // 'name' column
-    char album[150];    // 'album' column
-    char artist[100];   // 'artist' column
-    int popularity;     // 'popularity' column (0-100)
-    float danceability; // 'danceability' column (0.0 to 1.0)
-    float acousticness; // 'acousticness' column (0.0 to 1.0)
-    char mood[50];      // We will assume the last column is 'mood'
+    char title[150];
+    char album[150];
+    char artist[100];
+    float energy;  // Replaced popularity/danceability/acousticness
+    float valence; // Added valence
+    char mood[50];
 } Song;
 
-// Upgraded parser for the Kaggle Dataset
-// Upgraded parser for the Kaggle Dataset
+// Upgraded parser to extract Energy and Valence
 int loadSongs(const char *filename, Song songs[])
 {
     FILE *file = fopen(filename, "r");
@@ -31,7 +28,7 @@ int loadSongs(const char *filename, Song songs[])
         return 0;
     }
 
-    char line[1024]; // Increased line size for the massive 19-column Kaggle rows
+    char line[1024];
     int count = 0;
 
     // Skip the header row
@@ -40,7 +37,6 @@ int loadSongs(const char *filename, Song songs[])
     // Read each line
     while (fgets(line, sizeof(line), file) && count < MAX_SONGS)
     {
-        // We use strtok to split the string at every comma
         char *token = strtok(line, ",");
 
         if (token != NULL)
@@ -58,41 +54,38 @@ int loadSongs(const char *filename, Song songs[])
             if (token)
                 strncpy(songs[count].artist, token, sizeof(songs[count].artist) - 1);
 
-            // Skip 4 (ID) and 5 (Release Date)
+            // Skip 4 through 9 (ID, Release Date, Popularity, Length, Danceability, Acousticness)
+            for (int i = 0; i < 6; i++)
+            {
+                strtok(NULL, ",");
+            }
+
+            // 10. Energy (The "Arousal" metric)
+            token = strtok(NULL, ",");
+            if (token)
+                songs[count].energy = atof(token);
+
+            // Skip 11 and 12 (Instrumentalness, Liveness)
             strtok(NULL, ",");
             strtok(NULL, ",");
 
-            // 6. Popularity
+            // 13. Valence (The "Pleasure" metric)
             token = strtok(NULL, ",");
             if (token)
-                songs[count].popularity = atoi(token);
+                songs[count].valence = atof(token);
 
-            // Skip 7 (Length)
-            strtok(NULL, ",");
-
-            // 8. Danceability
-            token = strtok(NULL, ",");
-            if (token)
-                songs[count].danceability = atof(token);
-
-            // 9. Acousticness
-            token = strtok(NULL, ",");
-            if (token)
-                songs[count].acousticness = atof(token);
-
-            // Skip 10 through 18
-            for (int i = 0; i < 9; i++)
+            // Skip 14 through 18 (Loudness, Speechiness, Tempo, Key, Time Signature)
+            for (int i = 0; i < 5; i++)
             {
                 strtok(NULL, ",");
             }
 
             // 19. Mood (The final column)
-            token = strtok(NULL, ",\n\r"); // Look for comma OR newline at the end
+            token = strtok(NULL, ",\n\r");
             if (token)
             {
                 strncpy(songs[count].mood, token, sizeof(songs[count].mood) - 1);
-
-                // Optional: Clean up trailing whitespace/newlines from the mood string
+                // Clean up trailing whitespace/newlines
                 songs[count].mood[strcspn(songs[count].mood, "\r\n")] = 0;
             }
 
@@ -104,7 +97,7 @@ int loadSongs(const char *filename, Song songs[])
     return count;
 }
 
-// Lọc bài hát theo mood
+// Filter songs by mood
 int filterSongs(Song songs[], int total, Song filtered[], const char *mood)
 {
     int count = 0;
@@ -118,7 +111,7 @@ int filterSongs(Song songs[], int total, Song filtered[], const char *mood)
     return count;
 }
 
-// Shuffle mảng
+// Fisher-Yates Shuffle
 void shuffle(Song arr[], int n)
 {
     for (int i = n - 1; i > 0; i--)
@@ -130,15 +123,17 @@ void shuffle(Song arr[], int n)
     }
 }
 
-// In playlist
+// Updated Display output to prove the system logic and match the report terminology
 void printPlaylist(Song songs[], int n)
 {
     printf("\nYour AuraBeat Playlist:\n");
     for (int i = 0; i < n; i++)
     {
         printf("%d. %s - %s\n", i + 1, songs[i].title, songs[i].artist);
-        printf("   [Album: %s | Popularity: %d | Danceability: %.2f]\n",
-               songs[i].album, songs[i].popularity, songs[i].danceability);
+        // Changed "Energy" to "Arousal" to perfectly match the V-A theoretical model
+        printf("   [Album: %s | Valence: %.2f | Arousal: %.2f]\n",
+               songs[i].album, songs[i].valence, songs[i].energy);
+        printf("----------------------------------------------------\n");
     }
     printf("\n");
 }
@@ -152,12 +147,6 @@ int main()
 
     if (totalSongs == 0)
         return 1;
-
-    // char mood[50];
-    // printf("Enter your mood (happy/sad/energetic/...): ");
-    // scanf("%49s", mood);
-
-    // int filteredCount = filterSongs(songs, totalSongs, filtered, mood);
 
     int choice;
     char targetMood[50];
@@ -190,10 +179,10 @@ int main()
         break;
     default:
         printf("Invalid choice! Please run the program again and select 1-4.\n");
-        return 1; // Exit the program if they type something crazy like 99
+        return 1;
     }
 
-    // 4. Pass the newly translated targetMood string into your existing filter
+    // 4. Pass the newly translated targetMood string into the filter
     int filteredCount = filterSongs(songs, totalSongs, filtered, targetMood);
 
     if (filteredCount == 0)
