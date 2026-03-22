@@ -1,6 +1,11 @@
 # 🎵 AuraBeat - Hệ thống Gợi ý Âm nhạc (Audio Interest Recommendation System)
 
 Chào mừng đến với repository của AuraBeat! Đây là một công cụ gợi ý âm nhạc viết bằng C, tiến hành đọc và phân tích dữ liệu từ một bộ dataset trên Kaggle gồm 686 bài hát để tạo ra các playlist tùy chỉnh dựa trên tâm trạng người dùng (Happy, Sad, Energetic, Calm).
+## 📊 Nguồn Dữ Liệu (Data Source)
+Bộ dữ liệu sử dụng trong dự án này được lấy từ Kaggle:
+* **Tên Dataset:** [Spotify Music data to identify the moods](https://www.kaggle.com/datasets/musicblogger/spotify-music-data-to-identify-the-moods)
+* **Tác giả:** musicblogger
+* **Mô tả:** Chứa thông tin của 686 bài hát cùng với các chỉ số âm thanh (acousticness, danceability, energy, v.v.) và nhãn tâm trạng (mood) tương ứng.
 
 ## ⚠️ Quy định & Quy trình làm việc nhóm với Git (Team Git Workflow)
 

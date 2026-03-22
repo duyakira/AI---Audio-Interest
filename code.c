@@ -133,11 +133,11 @@ void shuffle(Song arr[], int n)
 // In playlist
 void printPlaylist(Song songs[], int n)
 {
-    printf("\n🎵 Your AuraBeat Playlist:\n");
+    printf("\nYour AuraBeat Playlist:\n");
     for (int i = 0; i < n; i++)
     {
         printf("%d. %s - %s\n", i + 1, songs[i].title, songs[i].artist);
-        printf("   [Album: %s | Pop: %d | Dance: %.2f]\n",
+        printf("   [Album: %s | Popularity: %d | Danceability: %.2f]\n",
                songs[i].album, songs[i].popularity, songs[i].danceability);
     }
     printf("\n");
